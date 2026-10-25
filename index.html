@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Banksy — уличное искусство как коммуникация</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Unbounded:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f3efe7; --surface:#fffdf8; --surface2:#ebe5d8; --ink:#121212; --muted:#6b6558;
+  --accent:#e63b2e; --line:rgba(18,18,18,.1); --r:28px;
+  --shadow:0 24px 50px -24px rgba(18,18,18,.35);
+  --ease:cubic-bezier(.22,1,.36,1);
+  --head:'Unbounded','Onest',system-ui,sans-serif; --body:'Onest',system-ui,sans-serif;
+}
+[data-theme="dark"]{
+  --bg:#0f0f10; --surface:#1a1a1c; --surface2:#262629; --ink:#f4f1ea; --muted:#a8a296;
+  --line:rgba(244,241,234,.12); --shadow:0 24px 50px -24px #000;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:clamp(15px,1.2vw,19px);line-height:1.55;transition:background .6s var(--ease),color .6s var(--ease)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:inherit}
+
+/* фон: плоские мягкие круги, без стекла и размытия */
+.bg i{position:fixed;border-radius:50%;pointer-events:none;z-index:0;opacity:.5;transition:background .6s}
+.bg i:nth-child(1){width:46vmax;height:46vmax;left:-18vmax;top:-20vmax;background:var(--surface2);animation:drift 22s ease-in-out infinite alternate}
+.bg i:nth-child(2){width:30vmax;height:30vmax;right:-12vmax;bottom:-14vmax;background:var(--accent);opacity:.12;animation:drift 28s ease-in-out infinite alternate-reverse}
+@keyframes drift{to{transform:translate(4vmax,3vmax) scale(1.08)}}
+
+/* верхняя панель */
+.top{position:fixed;inset:0 0 auto 0;z-index:30;display:flex;align-items:center;gap:14px;padding:16px clamp(14px,3vw,36px)}
+.brand{display:flex;align-items:center;gap:10px;background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-family:var(--head);font-weight:700;font-size:13px;letter-spacing:.06em}
+.brand b{width:10px;height:10px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{50%{transform:scale(1.5);opacity:.6}}
+.prog{flex:1;height:8px;border-radius:999px;background:var(--surface2);overflow:hidden}
+.prog i{display:block;height:100%;width:0;border-radius:999px;background:var(--accent);transition:width .8s var(--ease)}
+.count{font-family:var(--head);font-size:13px;font-weight:500;color:var(--muted);min-width:56px;text-align:right}
+.ibtn{width:44px;height:44px;border-radius:50%;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center;transition:transform .4s var(--ease),background .3s}
+.ibtn:hover{transform:scale(1.1) rotate(-6deg)}
+.ibtn svg{width:20px;height:20px;stroke:var(--ink);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* колода и переходы */
+.deck{position:fixed;inset:0;z-index:1}
+.slide{position:absolute;inset:0;opacity:0;visibility:hidden;transform:translateX(7%) scale(.97);transition:opacity .55s var(--ease),transform .9s var(--ease),visibility 0s .9s}
+.slide.prev{transform:translateX(-7%) scale(.97)}
+.slide.back{transform:translateX(-7%) scale(.97)}
+.slide.active{opacity:1;visibility:visible;transform:none;transition-delay:0s}
+.wrap{height:100%;display:flex;overflow-y:auto;overflow-x:hidden;padding:84px clamp(16px,5vw,72px) 100px;scrollbar-width:none}
+.wrap::-webkit-scrollbar{display:none}
+.wrap>*{margin:auto;width:min(1180px,100%)}
+
+[data-a]{opacity:0;transform:translateY(28px);transition:opacity .6s var(--ease),transform .9s var(--ease)}
+.slide.active [data-a]{opacity:1;transform:none;transition-delay:calc(var(--i,0)*85ms + 260ms)}
+[data-a="mask"]{opacity:1;transform:none;clip-path:inset(100% 0 0 0 round 34px);transition:clip-path 1.2s var(--ease)}
+.slide.active [data-a="mask"]{clip-path:inset(0 0 0 0 round 34px);transition-delay:.3s}
+
+/* типографика */
+h1,h2,h3{font-family:var(--head);line-height:1.08;letter-spacing:-.02em}
+h2{font-size:clamp(26px,3.6vw,52px);font-weight:700}
+h3{font-size:clamp(17px,1.6vw,22px);font-weight:700}
+.eyebrow{font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+.lead{font-size:clamp(17px,1.7vw,24px);color:var(--muted);max-width:42ch}
+.orig{color:var(--muted);font-style:italic;margin:6px 0 20px}
+p+p{margin-top:.8em}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;background:var(--surface2);font-size:13px;font-weight:600}
+.pill.red{background:var(--accent);color:#fff}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:clamp(18px,2vw,28px);box-shadow:var(--shadow)}
+.cta{display:inline-flex;align-items:center;gap:12px;background:var(--accent);color:#fff;padding:16px 28px;border-radius:999px;font-weight:700;margin-top:26px;transition:transform .4s var(--ease),box-shadow .4s}
+.cta:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 16px 30px -12px var(--accent)}
+.cta span{transition:transform .4s var(--ease)}.cta:hover span{transform:translateX(6px)}
+
+/* титул */
+.hero{position:relative;z-index:2}
+.spray{font-size:clamp(54px,14vw,200px);font-weight:900;letter-spacing:-.05em;line-height:.95;overflow:hidden;padding-bottom:.06em;margin:6px 0 16px}
+.spray span{display:inline-block;transform:translateY(112%);transition:transform 1s var(--ease)}
+.slide.active .spray span{transform:none;transition-delay:calc(var(--k)*70ms + 350ms)}
+.spray span:nth-child(3){color:var(--accent)}
+.balloon{position:absolute;right:clamp(10px,9vw,160px);top:50%;width:clamp(110px,16vw,230px);margin-top:-18vmin!important;width:clamp(110px,16vw,230px);cursor:pointer;z-index:1;animation:bob 5s ease-in-out infinite}
+.balloon svg{width:100%;overflow:visible;filter:drop-shadow(0 20px 18px rgba(230,59,46,.28))}
+.balloon .str{transform-origin:50px 100px;animation:sway 3s ease-in-out infinite}
+.balloon.fly{animation:fly 2.6s var(--ease) forwards}
+@keyframes bob{50%{transform:translateY(-22px) rotate(3deg)}}
+@keyframes sway{50%{transform:rotate(7deg)}}
+@keyframes fly{0%{transform:none}55%{transform:translateY(-120vh) rotate(14deg);opacity:1}56%{opacity:0}57%{transform:translateY(40vh)}100%{transform:none;opacity:1}}
+.hint{margin-top:22px;font-size:13px;color:var(--muted)}
+
+/* сетки */
+.two{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(20px,4vw,56px);align-items:center}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.stat{display:flex;align-items:center;gap:14px;padding:18px 20px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);transition:transform .5s var(--ease)}
+.stat:hover{transform:translateX(8px)}
+.stat .ic{width:46px;height:46px;border-radius:16px;background:var(--surface2);display:grid;place-items:center;font-size:21px;flex:none}
+.stat small{display:block;color:var(--muted);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.stat b{font-size:16px}
+
+/* аккордеон */
+.acc{display:grid;gap:12px}
+.acc-i{border-radius:24px;background:var(--surface);border:1px solid var(--line);overflow:hidden;transition:background .4s,transform .5s var(--ease)}
+.acc-i:hover{transform:translateY(-2px)}
+.acc-h{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:18px 22px;font-weight:700;font-family:var(--head);font-size:clamp(14px,1.3vw,18px)}
+.acc-h em{margin-left:auto;width:34px;height:34px;border-radius:50%;background:var(--surface2);display:grid;place-items:center;font-style:normal;font-size:20px;transition:transform .5s var(--ease),background .3s,color .3s;flex:none}
+.acc-b{display:grid;grid-template-rows:0fr;transition:grid-template-rows .6s var(--ease)}
+.acc-b>div{overflow:hidden}
+.acc-b p{padding:0 22px 20px 62px;color:var(--muted)}
+.acc-i.open .acc-b{grid-template-rows:1fr}
+.acc-i.open .acc-h em{transform:rotate(135deg);background:var(--accent);color:#fff}
+.acc-n{width:32px;font-size:13px;color:var(--accent);flex:none}
+
+/* темы */
+.theme{padding:24px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);text-align:left;display:flex;flex-direction:column;gap:12px;min-height:230px;transition:transform .6s var(--ease),box-shadow .6s var(--ease),background .4s}
+.theme:hover{transform:translateY(-10px) rotate(-1deg);box-shadow:var(--shadow)}
+.theme .em{width:58px;height:58px;border-radius:20px;background:var(--surface2);display:grid;place-items:center;font-size:28px;transition:transform .6s var(--ease),background .4s}
+.theme:hover .em{transform:rotate(-12deg) scale(1.12);background:var(--accent)}
+.theme p{color:var(--muted);font-size:.93em}
+.theme .go{margin-top:auto;font-size:13px;font-weight:700;color:var(--accent)}
+
+/* карта/хронология */
+.tl{position:relative;display:flex;gap:14px;overflow-x:auto;padding:36px 4px 20px;scrollbar-width:thin}
+.tl::before{content:"";position:absolute;left:0;right:0;top:56px;height:4px;border-radius:4px;background:var(--surface2)}
+.tl::after{content:"";position:absolute;left:0;top:56px;height:4px;border-radius:4px;background:var(--accent);width:0;transition:width 2.2s var(--ease) .6s}
+.slide.active .tl::after{width:100%}
+.node{position:relative;flex:0 0 clamp(170px,19vw,230px);padding:44px 18px 18px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);text-align:left;transition:transform .6s var(--ease),box-shadow .6s var(--ease)}
+.node::before{content:"";position:absolute;left:18px;top:-8px;width:20px;height:20px;border-radius:50%;background:var(--bg);border:5px solid var(--accent);transition:transform .5s var(--ease);z-index:1}
+.node:hover{transform:translateY(-8px);box-shadow:var(--shadow)}.node:hover::before{transform:scale(1.4)}
+.node .y{font-family:var(--head);font-weight:900;font-size:24px;color:var(--accent)}
+.node .w{font-weight:700;margin:6px 0 4px;line-height:1.25}
+.node .p{color:var(--muted);font-size:13px}
+
+/* работы */
+.work{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(22px,4vw,60px);align-items:center}
+.frame{position:relative;border-radius:34px;background:var(--surface2);box-shadow:var(--shadow);overflow:hidden;cursor:zoom-in;min-height:200px;display:grid;place-items:center;padding:10px;transform-style:preserve-3d;transition:transform .5s var(--ease)}
+.frame img{display:block;width:100%;max-height:58vh;object-fit:contain;border-radius:24px;transition:transform .8s var(--ease)}
+.frame:hover img{transform:scale(1.03)}
+.frame .zoom{position:absolute;right:16px;bottom:16px;width:42px;height:42px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-size:18px;opacity:0;transform:scale(.6);transition:.4s var(--ease)}
+.frame:hover .zoom{opacity:1;transform:none}
+.ph{padding:30px;text-align:center;color:var(--muted);font-size:14px}
+.ph b{display:block;font-family:var(--head);color:var(--ink);margin-bottom:8px}
+.ph label{display:inline-block;margin-top:14px;padding:10px 18px;border-radius:999px;background:var(--ink);color:var(--bg);cursor:pointer;font-weight:600}
+.ph input{display:none}
+.info h2{margin-bottom:2px}
+
+.tabs{position:relative;display:inline-flex;background:var(--surface2);border-radius:999px;padding:5px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs .ind{position:absolute;top:5px;bottom:5px;left:0;width:0;border-radius:999px;background:var(--ink);transition:transform .55s var(--ease),width .55s var(--ease);z-index:0}
+.tab{position:relative;z-index:1;white-space:nowrap;padding:10px 18px;border-radius:999px;font-weight:600;font-size:14px;color:var(--muted);transition:color .35s}
+.tab.on{color:var(--bg)}
+.panels{position:relative;margin-top:16px;display:grid}
+.panel{grid-area:1/1;opacity:0;transform:translateY(14px);pointer-events:none;transition:opacity .45s var(--ease),transform .6s var(--ease)}
+.panel.on{opacity:1;transform:none;pointer-events:auto}
+.fact{margin-top:18px;padding:14px 18px;border-radius:22px;background:var(--surface);border:1px dashed var(--accent);font-size:.92em}
+.fact b{color:var(--accent)}
+
+/* деньги */
+.bars{display:flex;align-items:flex-end;gap:clamp(12px,2vw,26px);height:clamp(220px,38vh,340px);padding:0 4px}
+.bar{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:10px;text-align:center}
+.bar .col{width:100%;height:0;border-radius:24px 24px 12px 12px;background:var(--ink);transition:height 1.6s var(--ease) .5s,background .4s,transform .5s var(--ease)}
+.bar:hover .col{transform:translateY(-6px)}
+.bar.sel .col{background:var(--accent)}
+.bar.est .col{background:repeating-linear-gradient(135deg,var(--surface2) 0 10px,var(--bg) 10px 20px);border:2px dashed var(--muted)}
+.bar.est.sel .col{border-color:var(--accent)}
+.bar b{font-family:var(--head);font-size:clamp(14px,1.5vw,22px)}
+.bar small{color:var(--muted);font-size:12px}
+.slide.active .bar .col{height:var(--h)}
+.detail{margin-top:14px;min-height:72px}
+.big{font-family:var(--head);font-weight:900;font-size:clamp(46px,8vw,110px);line-height:1;letter-spacing:-.04em;color:var(--accent)}
+
+/* цитата */
+.quote{position:relative;padding:clamp(22px,3vw,40px);border-radius:var(--r);background:var(--ink);color:var(--bg)}
+.quote::before{content:"“";position:absolute;left:22px;top:-18px;font-family:var(--head);font-weight:900;font-size:110px;line-height:1;color:var(--accent)}
+.quote p{font-size:clamp(15px,1.45vw,20px);margin-top:14px}
+.quote small{display:block;margin-top:14px;opacity:.65}
+
+/* снег/пепел */
+#fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
+.sw{display:flex;align-items:center;gap:12px;margin-top:18px;flex-wrap:wrap}
+.sw span{font-size:13px;color:var(--muted)}
+.cap{margin-top:12px;min-height:48px;transition:opacity .4s}
+
+/* флип-карточки */
+.flip{perspective:1000px;height:clamp(190px,26vh,240px);cursor:pointer}
+.flip>div{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .9s var(--ease)}
+.flip.on>div{transform:rotateY(180deg)}
+.flip .f,.flip .b{position:absolute;inset:0;border-radius:var(--r);padding:22px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;justify-content:space-between}
+.flip .f{background:var(--surface);border:1px solid var(--line)}
+.flip .f i{font-style:normal;font-family:var(--head);font-weight:900;font-size:36px;color:var(--accent)}
+.flip .b{background:var(--accent);color:#fff;transform:rotateY(180deg);font-size:.93em}
+.flip .b b{font-family:var(--head)}
+
+/* викторина */
+.qz{max-width:760px}
+.qopts{display:grid;gap:10px;margin-top:20px}
+.qo{text-align:left;padding:16px 20px;border-radius:22px;background:var(--surface);border:2px solid var(--line);font-weight:500;transition:transform .4s var(--ease),border-color .3s,background .3s}
+.qo:hover{transform:translateX(8px);border-color:var(--ink)}
+.qo.ok{background:#1f9d55;border-color:#1f9d55;color:#fff;animation:pop .6s var(--ease)}
+.qo.no{background:var(--accent);border-color:var(--accent);color:#fff;animation:shake .5s}
+.qo[disabled]{pointer-events:none}
+@keyframes pop{40%{transform:scale(1.04)}}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.qmeta{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;color:var(--muted);font-size:14px}
+.qnext{margin-top:18px;padding:12px 24px;border-radius:999px;background:var(--ink);color:var(--bg);font-weight:700;opacity:0;pointer-events:none;transition:opacity .4s}
+.qnext.show{opacity:1;pointer-events:auto}
+.ring{width:150px;height:150px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--accent) calc(var(--p)*1%),var(--surface2) 0);transition:--p 1s;position:relative}
+.ring::before{content:"";position:absolute;inset:14px;border-radius:50%;background:var(--bg)}
+.ring b{position:relative;font-family:var(--head);font-size:34px}
+
+/* источники */
+.src{display:grid;gap:8px;margin-top:20px}
+.src a{display:flex;gap:10px;align-items:center;padding:12px 18px;border-radius:20px;background:var(--surface);border:1px solid var(--line);text-decoration:none;font-size:14px;transition:transform .4s var(--ease),border-color .3s}
+.src a:hover{transform:translateX(8px);border-color:var(--accent)}
+.src a i{font-style:normal;color:var(--accent);font-weight:700}
+
+/* док */
+.dock{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:30;display:flex;align-items:center;gap:12px;padding:8px;border-radius:999px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}
+.nb{width:50px;height:50px;border-radius:50%;background:var(--surface2);display:grid;place-items:center;transition:transform .4s var(--ease),background .3s}
+.nb:hover{transform:scale(1.1)}
+.nb.next{background:var(--ink);color:var(--bg)}
+.nb svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.nb[disabled]{opacity:.35;pointer-events:none}
+.dots{display:flex;gap:6px;align-items:center;max-width:46vw;overflow:hidden}
+.dots button{width:8px;height:8px;border-radius:99px;background:var(--line);flex:none;transition:width .5s var(--ease),background .3s}
+[data-theme="dark"] .dots button{background:rgba(244,241,234,.25)}
+.dots button.on{width:28px;background:var(--accent)}
+
+/* обзор и лайтбокс */
+.ov{position:fixed;inset:0;z-index:50;background:var(--bg);padding:90px clamp(16px,5vw,64px) 40px;overflow-y:auto;opacity:0;visibility:hidden;transform:scale(1.04);transition:opacity .5s var(--ease),transform .7s var(--ease),visibility 0s .7s}
+.ov.on{opacity:1;visibility:visible;transform:none;transition-delay:0s}
+.ov-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;max-width:1180px;margin:0 auto}
+.ov-c{text-align:left;padding:20px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);min-height:120px;display:flex;flex-direction:column;justify-content:space-between;transition:transform .5s var(--ease),border-color .3s}
+.ov-c:hover{transform:translateY(-6px);border-color:var(--accent)}
+.ov-c i{font-style:normal;font-family:var(--head);font-weight:900;color:var(--accent);font-size:22px}
+.ov-c.cur{border-color:var(--accent);background:var(--surface2)}
+.lb{position:fixed;inset:0;z-index:60;background:rgba(10,10,10,.92);display:grid;place-items:center;opacity:0;visibility:hidden;transition:opacity .45s var(--ease),visibility 0s .45s;cursor:zoom-out;padding:24px}
+.lb.on{opacity:1;visibility:visible;transition-delay:0s}
+.lb img{max-width:100%;max-height:100%;border-radius:28px;transform:scale(.88);transition:transform .7s var(--ease)}
+.lb.on img{transform:none}
+
+@media (max-width:900px){
+  .two,.work{grid-template-columns:1fr}
+  .grid4{grid-template-columns:1fr 1fr}.grid3{grid-template-columns:1fr}
+  .frame img{max-height:38vh}
+  .balloon{display:none}
+  .count{display:none}
+  .acc-b p{padding-left:22px}
+  .dots{display:none}
+}
+@media (max-width:520px){.grid4{grid-template-columns:1fr}.brand{font-size:11px;padding:9px 14px}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important;transition-delay:0s!important}}
+</style>
+</head>
+<body>
+<div class="bg"><i></i><i></i></div>
+
+<header class="top">
+  <div class="brand"><b></b>BANKSY</div>
+  <div class="prog"><i id="prog"></i></div>
+  <div class="count" id="count">1 / 1</div>
+  <button class="ibtn" id="bOv" title="Все слайды (G)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></button>
+  <button class="ibtn" id="bTheme" title="Светлая / тёмная тема (T)"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+  <button class="ibtn" id="bFs" title="Полный экран (F)"><svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
+</header>
+
+<main class="deck" id="deck">
+
+<!-- 1. ТИТУЛ -->
+<section class="slide" id="title" data-title="Титул">
+  <div class="wrap"><div class="hero">
+    <div class="eyebrow" data-a>Социальные коммуникации</div>
+    <h1 class="spray" data-spray>BANKSY</h1>
+    <p class="lead" data-a>Уличное искусство как язык, на котором общество разговаривает с самим собой</p>
+    <div class="chips" style="margin-top:22px" data-a><span class="pill">Бристоль</span><span class="pill">с 1990-х</span><span class="pill">трафарет</span><span class="pill red">анонимность</span></div>
+    <button class="cta" data-a data-next>Начать <span>→</span></button>
+    <p class="hint" data-a>Листайте стрелками, свайпом или кнопками внизу. Попробуйте нажать на шарик.</p>
+  </div>
+  <div class="balloon" id="balloonBtn" title="Отпустить шарик">
+    <svg viewBox="0 0 100 160"><path d="M50 100C8 70-2 38 20 20 35 8 50 17 50 32 50 17 65 8 80 20 102 38 92 70 50 100Z" fill="#e63b2e"/><path d="M30 28c6-6 14-6 18 0" stroke="#fff" stroke-opacity=".5" stroke-width="4" fill="none" stroke-linecap="round"/><g class="str"><path d="M50 100q-7 14 4 26t-2 32" stroke="var(--ink)" stroke-width="2" fill="none" stroke-linecap="round"/></g></svg>
+  </div></div>
+</section>
+
+<!-- 2. КТО ТАКОЙ -->
+<section class="slide" id="who" data-title="Кто такой Бэнкси">
+  <div class="wrap"><div class="two">
+    <div>
+      <div class="eyebrow" data-a>Знакомство</div>
+      <h2 data-a>Кто такой Бэнкси</h2>
+      <p style="margin-top:18px" data-a>Бэнкси (англ. Banksy) — псевдоним анонимного английского андерграундного художника стрит-арта, политического активиста и режиссёра, работающего с 1990-х годов.</p>
+      <p data-a>Настоящее имя и происхождение Бэнкси неизвестны, вокруг его биографии в обществе ведётся много споров.</p>
+    </div>
+    <div style="display:grid;gap:12px">
+      <div class="stat" data-a><div class="ic">🎨</div><div><small>Направление</small><b>Стрит-арт, андерграунд</b></div></div>
+      <div class="stat" data-a><div class="ic">✂️</div><div><small>Фирменная техника</small><b>Трафарет (стенсил)</b></div></div>
+      <div class="stat" data-a><div class="ic">📍</div><div><small>Связан с городом</small><b>Бристоль, Англия</b></div></div>
+      <div class="stat" data-a><div class="ic">🎬</div><div><small>Кино</small><b>«Выход через сувенирную лавку», номинация на «Оскар»</b></div></div>
+    </div>
+  </div></div>
+</section>
+
+<!-- 3. АНОНИМНОСТЬ -->
+<section class="slide" id="anon" data-title="Анонимность как стратегия">
+  <div class="wrap"><div class="two">
+    <div>
+      <div class="eyebrow" data-a>Взгляд с точки зрения коммуникаций</div>
+      <h2 data-a>Анонимность — это стратегия</h2>
+      <p class="lead" style="margin-top:16px" data-a>Нет лица и имени — остаётся только сообщение. Нажмите на пункт, чтобы раскрыть.</p>
+    </div>
+    <div class="acc" id="acc" data-a>
+      <div class="acc-i open"><button class="acc-h"><span class="acc-n">01</span>Сообщение важнее автора<em>+</em></button><div class="acc-b"><div><p>Когда нет личности, обсуждают работу и её смысл, а не биографию и скандалы художника.</p></div></div></div>
+      <div class="acc-i"><button class="acc-h"><span class="acc-n">02</span>Загадка работает как маркетинг<em>+</em></button><div class="acc-b"><div><p>Тайна заставляет СМИ и соцсети гадать, искать и пересказывать. Охват растёт без рекламного бюджета.</p></div></div></div>
+      <div class="acc-i"><button class="acc-h"><span class="acc-n">03</span>Свобода говорить резко<em>+</em></button><div class="acc-b"><div><p>Критика власти, рынка и войны звучит смелее, когда автор не привязан к имени. Работы на улице часто появляются без разрешения.</p></div></div></div>
+      <div class="acc-i"><button class="acc-h"><span class="acc-n">04</span>Подлинность без лица<em>+</em></button><div class="acc-b"><div><p>Авторство подтверждается своими каналами: так «Season’s Greetings» стала «настоящей» после видео в его Instagram.</p></div></div></div>
+    </div>
+  </div></div>
+</section>
+
+<!-- 4. ТЕМЫ -->
+<section class="slide" id="themes" data-title="О чём говорит Бэнкси">
+  <div class="wrap"><div>
+    <div class="eyebrow" data-a>Повестка</div>
+    <h2 data-a style="margin-bottom:8px">О чём говорит Бэнкси</h2>
+    <p class="lead" data-a style="margin-bottom:26px">Бэнкси поднимает много социальных тем. Нажмите на карточку, чтобы перейти к работе.</p>
+    <div class="grid4">
+      <button class="theme" data-a data-go="snow"><div class="em">🌍</div><h3>Экология</h3><p>Загрязнение воздуха, мусор, цена, которую природа платит за промышленность.</p><span class="go">К работе →</span></button>
+      <button class="theme" data-a><div class="em">💧</div><h3>Нехватка воды</h3><p>Ресурсы, которые мы привыкли считать бесконечными, на деле исчерпаемы.</p><span class="go">Глобальная тема</span></button>
+      <button class="theme" data-a data-go="jobs"><div class="em">🧳</div><h3>Беженцы</h3><p>Миграция как ресурс, а не бремя: человеческие судьбы за статистикой.</p><span class="go">К работе →</span></button>
+      <button class="theme" data-a data-go="bin"><div class="em">🏛️</div><h3>Арт-рынок и власть</h3><p>Коммерциализация искусства и привычка прятать неудобные проблемы.</p><span class="go">К работе →</span></button>
+    </div>
+  </div></div>
+</section>
+
+<!-- 5. КАРТА РАБОТ -->
+<section class="slide" id="map" data-title="Хронология и карта работ">
+  <div class="wrap"><div>
+    <div class="eyebrow" data-a>Хронология и география</div>
+    <h2 data-a>Работы в этой презентации</h2>
+    <p class="lead" data-a style="margin:12px 0 0">От Лондона до Тимбукту. Нажмите на любую точку, чтобы открыть работу.</p>
+    <div class="tl" data-a>
+      <button class="node" data-go="balloon"><div class="y">2002</div><div class="w">Девочка с воздушным шаром</div><div class="p">Лондон</div></button>
+      <button class="node" data-go="maid"><div class="y">2006</div><div class="w">Горничная, заметающая сор</div><div class="p">Северный Лондон</div></button>
+      <button class="node" data-go="zebra"><div class="y">2009</div><div class="w">Зебра и бельевая верёвка</div><div class="p">Тимбукту, Мали</div></button>
+      <button class="node" data-go="jobs"><div class="y">2015</div><div class="w">Стив Джобс — беженец</div><div class="p">Кале, Франция</div></button>
+      <button class="node" data-go="rat"><div class="y">2018</div><div class="w">Крыса на часах</div><div class="p">Нью-Йорк</div></button>
+      <button class="node" data-go="snow"><div class="y">2018</div><div class="w">Season’s Greetings</div><div class="p">Порт-Талбот, Уэльс</div></button>
+      <button class="node" data-go="bin"><div class="y">2018–21</div><div class="w">Любовь в мусорном баке</div><div class="p">Лондон, Sotheby’s</div></button>
+    </div>
+  </div></div>
+</section>
+
+<!-- РАБОТЫ (заполняются скриптом) -->
+<section class="slide" id="balloon-s" data-work="balloon"></section>
+
+<!-- 7. ДЕНЬГИ -->
+<section class="slide" id="bin" data-title="Любовь в мусорном баке">
+  <div class="wrap"><div class="two">
+    <div>
+      <div class="eyebrow" data-a>Продолжение истории шара</div>
+      <h2 data-a>Любовь в мусорном баке</h2>
+      <p style="margin-top:16px" data-a>Октябрь 2018, Sotheby’s. Едва аукционист стукнул молотком, картина самоуничтожилась через шредер в раме. Бэнкси превратил продажу в перформанс, а полуразрезанную работу переименовал.</p>
+      <div class="big" data-a style="margin-top:18px"><span data-count="18" data-prefix="×">0</span></div>
+      <p data-a style="color:var(--muted)">во столько раз выросла цена за три года</p>
+    </div>
+    <div>
+      <div class="bars" id="bars" data-a>
+        <button class="bar sel" data-d="2018: молоток опустился на £1 042 000 (около $1,4 млн), и картина тут же начала разрезаться." style="--h:6%"><b>£1,04 млн</b><div class="col"></div><small>Октябрь 2018</small></button>
+        <button class="bar est" data-d="Оценка Sotheby’s перед повторными торгами в 2021 году: от £4 до £6 млн." style="--h:32%"><b>£4–6 млн</b><div class="col"></div><small>Оценка 2021</small></button>
+        <button class="bar" data-d="14 октября 2021: £18 582 000 (около $25,4 млн) с комиссией аукциона. Десять минут торгов, девять участников в зале, рекорд для Бэнкси." style="--h:100%"><b>£18,58 млн</b><div class="col"></div><small>Октябрь 2021</small></button>
+      </div>
+      <div class="card detail" id="barD" data-a>2018: молоток опустился на £1 042 000 (около $1,4 млн), и картина тут же начала разрезаться.</div>
+    </div>
+  </div></div>
+</section>
+
+<!-- 8. ДЖОБС -->
+<section class="slide" id="jobs" data-title="Стив Джобс — сын мигранта">
+  <div class="wrap"><div class="two">
+    <div>
+      <div class="chips" data-a><span class="pill red">📍 Кале, Франция</span><span class="pill">2015</span></div>
+      <h2 data-a>Стив Джобс в образе сирийского беженца</h2>
+      <p style="margin-top:18px" data-a>Бэнкси поднимает тему беженцев. Отец Стива Джобса родом из Сирии. Если бы его не пустили в Америку, у нас с вами не было бы Apple.</p>
+      <div class="big" data-a style="margin-top:20px"><span data-count="7" data-prefix="$" data-suffix="+ млрд">0</span></div>
+      <p data-a style="color:var(--muted)">налогов в год платит Apple (по словам Бэнкси)</p>
+    </div>
+    <div class="quote" data-a>
+      <p>«Нас часто убеждают, что миграция — это бремя для экономики страны, но Стив Джобс был сыном сирийского мигранта. Apple — это самый прибыльный в мире бренд, он платит более 7 миллиардов долларов налогов в год — и он существует только потому, что в свое время в США пустили молодого человека из Хомса».</p>
+      <small>Бэнкси</small>
+    </div>
+  </div></div>
+</section>
+
+<section class="slide" id="maid-s" data-work="maid"></section>
+<section class="slide" id="snow-s" data-work="snow"></section>
+<section class="slide" id="zebra-s" data-work="zebra"></section>
+<section class="slide" id="rat-s" data-work="rat"></section>
+
+<!-- УРОКИ -->
+<section class="slide" id="lessons" data-title="Чему учит Бэнкси">
+  <div class="wrap"><div>
+    <div class="eyebrow" data-a>Выводы для социальных коммуникаций</div>
+    <h2 data-a>5 уроков Бэнкси</h2>
+    <p class="lead" data-a style="margin:12px 0 24px">Нажмите на карточку, чтобы перевернуть.</p>
+    <div class="grid3" id="flips">
+      <div class="flip" data-a><div><div class="f"><i>01</i><h3>Место — это носитель смысла</h3></div><div class="b"><b>Порт-Талбот, 14-я улица</b>Работа привязана к месту, и от этого её читают точнее: сталелитейный город — пепел, мёртвые часы банка — «крысиные бега».</div></div></div>
+      <div class="flip" data-a><div><div class="f"><i>02</i><h3>Неожиданность запоминается</h3></div><div class="b"><b>Шредер в раме</b>Инфоповод создаётся самим действием. Об аукционе 2018 года говорили все.</div></div></div>
+      <div class="flip" data-a><div><div class="f"><i>03</i><h3>Простой символ плюс эмоция</h3></div><div class="b"><b>Девочка и шар</b>Один образ считывается за секунду и работает на любом языке.</div></div></div>
+      <div class="flip" data-a><div><div class="f"><i>04</i><h3>Эфемерность создаёт срочность</h3></div><div class="b"><b>Нью-Йорк, 2018</b>Часы с крысой демонтировали через несколько дней. Работы можно потерять, поэтому их спешат увидеть и показать другим.</div></div></div>
+      <div class="flip" data-a><div><div class="f"><i>05</i><h3>Свои каналы — своя повестка</h3></div><div class="b"><b>Instagram и сайт</b>Подтверждение авторства и комментарии идут напрямую, без посредников.</div></div></div>
+      <div class="flip" data-a><div><div class="f"><i>06</i><h3>Шутка как дверь для серьёзного</h3></div><div class="b"><b>Юмор и ирония</b>Мы улыбаемся, а потом понимаем, что речь о загрязнении, беженцах или власти.</div></div></div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ВИКТОРИНА -->
+<section class="slide" id="quiz" data-title="Проверьте себя">
+  <div class="wrap"><div class="qz" id="qz">
+    <div class="eyebrow" data-a>Мини-викторина</div>
+    <div id="qBody" data-a></div>
+  </div></div>
+</section>
+
+<!-- ФИНАЛ -->
+<section class="slide" id="end" data-title="Спасибо и источники">
+  <div class="wrap"><div class="two">
+    <div>
+      <div class="eyebrow" data-a>Финал</div>
+      <h2 data-a style="font-size:clamp(34px,6vw,84px)">Спасибо!</h2>
+      <p class="lead" data-a style="margin-top:14px">Улица — самая большая галерея. Вопросы?</p>
+      <button class="cta" data-a data-go="title">В начало <span>↺</span></button>
+    </div>
+    <div>
+      <h3 data-a>Источники</h3>
+      <div class="src" data-a>
+        <a href="https://www.theartnewspaper.com/2022/02/08/where-now-for-the-port-talbot-banksy" target="_blank" rel="noopener"><i>↗</i>The Art Newspaper — Season’s Greetings, Порт-Талбот</a>
+        <a href="https://www.nme.com/news/port-talbot-man-tried-to-destroy-banksy-mural-before-it-was-moved-to-england-3131329" target="_blank" rel="noopener"><i>↗</i>NME — продажа и перенос Season’s Greetings</a>
+        <a href="https://hyperallergic.com/banksy-returns-new-york-14th-street-rat/" target="_blank" rel="noopener"><i>↗</i>Hyperallergic — крыса на 14-й улице</a>
+        <a href="https://www.bristol247.com/culture/art/banksy-artwork-sells-for-record-price/" target="_blank" rel="noopener"><i>↗</i>Bristol24/7 — Love is in the Bin, 2021</a>
+        <a href="https://banksyexplained.com/sweep-it-under-the-carpet-2006/" target="_blank" rel="noopener"><i>↗</i>Banksy Explained — Sweep It Under the Carpet</a>
+        <a href="https://streetartutopia.com/2026/08/14/some-of-banksys-most-clever-street-art/" target="_blank" rel="noopener"><i>↗</i>Street Art Utopia — Washing Zebra Stripes, Мали</a>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+</main>
+
+<nav class="dock">
+  <button class="nb" id="bPrev" aria-label="Назад"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <div class="dots" id="dots"></div>
+  <button class="nb next" id="bNext" aria-label="Вперёд"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+</nav>
+
+<div class="ov" id="ov"><div class="ov-g" id="ovG"></div></div>
+<div class="lb" id="lb"><img alt=""></div>
+
+<script>
+/* ===== НАСТРОЙКИ ФОТО =====
+   Положите фото рядом с index.html. Имя файла без расширения указано ниже
+   (подойдут jpg, jpeg, png, webp). Если ваши файлы называются иначе — просто поменяйте имя здесь. */
+const IMAGE_FILES = {
+  balloon: 'girlWithTheBaloon',
+  maid:    'undertheRUG',
+  snow:    'seasonsGreetings',
+  zebra:   'zebraStripes',
+  rat:     'clockRat'
+};
+const EXT = ['jpg','jpeg','png','webp','JPG','PNG','JPEG'];
+
+/* ===== ДАННЫЕ О РАБОТАХ ===== */
+const WORKS = {
+  balloon:{
+    title:'Девочка с воздушным шаром', orig:'Girl with Balloon', year:'2002', place:'Лондон, район Шордич',
+    tabs:[
+      {t:'Надежда и утрата', h:'<p>Маленькая девочка тянется к красному воздушному шару в форме сердца, который улетает от неё. Изначально граффити в районе Шордич сопровождалось надписью «There’s always hope» («Всегда есть надежда»).</p><p>Работа символизирует хрупкость детских мечтаний и невинности и то, как быстро мы теряем то, что любим.</p>'},
+      {t:'Беженцы', h:'<p>В 2014 году Бэнкси использовал этот образ для поддержки сирийских беженцев и памяти детей, погибших в конфликте.</p><p>Так девочка превратилась в символ сочувствия к жертвам войны.</p>'},
+      {t:'Против коммерции', h:'<p>В 2018 году на аукционе Sotheby’s полотно самоуничтожилось с помощью шредера, встроенного в раму, сразу после продажи за £1,04 млн. Это стало едкой сатирой на арт-рынок.</p><p>Позже полуразрушенную работу переименовали в «Любовь в мусорном баке».</p>'}
+    ],
+    fact:'<b>Самая популярная работа Бэнкси</b> — один из самых узнаваемых образов современного уличного искусства.'
+  },
+  maid:{
+    title:'Горничная, заметающая сор под стену', orig:'Sweep It Under the Carpet', year:'2006', place:'Чок-Фарм-роуд, Северный Лондон',
+    tabs:[
+      {t:'Смысл', h:'<p>Девушка в форме горничной заметает сор под стену. Художник обыгрывает метафору: слишком неудобные проблемы правительства не решают, а просто прячут «под ковёр».</p><p>Их обнародование ударило бы по репутации властей предержащих.</p>'},
+      {t:'Какие проблемы?', h:'<p>Сложно сказать, что именно имел в виду Бэнкси. Одна из версий: в 2006 году уже появлялись признаки грядущего мирового финансового кризиса, но открыто о коллапсе никто не говорил.</p>'},
+      {t:'История', h:'<p>Работа появилась в 2006 году на стене у галереи и стала одним из самых популярных трафаретов Бэнкси. Прототипом, по его словам, стала Лиэнн, горничная из мотеля в Лос-Анджелесе, которая убирала его номер.</p>'}
+    ],
+    fact:'<b>Лайфхак для зрителя:</b> когда сообщение упаковано в бытовой жест, его понимают без подписи.'
+  },
+  snow:{
+    title:'Season’s Greetings', orig:'«С праздниками» · «Поздравления сезона»', year:'2018', place:'Порт-Талбот, Уэльс', extra:'snow',
+    tabs:[
+      {t:'Что мы видим', h:'<p>Мальчик в шапке ловит языком «снежинки». Но стоит зайти за угол гаража, и видно горящий мусорный контейнер: это не снег, а пепел.</p>'},
+      {t:'Смысл', h:'<p>Работа говорит о загрязнении воздуха. Порт-Талбот — сталелитейный город, на горизонте видны трубы завода Tata Steel. Название, как рождественская открытка, звучит иронично.</p><p>Почти вся работа чёрно-белая, лишь огонь красный, а язык мальчика розовый.</p>'},
+      {t:'Судьба работы', h:'<p>Бэнкси подтвердил авторство видео в Instagram. В 2019 году работу купил коллекционер Джон Брандлер (по сообщениям, за £500 тыс.) и перенёс с гаража в центр города. В 2022 году её вывезли из Уэльса.</p>'}
+    ],
+    fact:'<b>Двойная работа:</b> одна и та же стена показывает радость и катастрофу — всё зависит от ракурса.'
+  },
+  zebra:{
+    title:'Зебра и бельевая верёвка', orig:'Washing Zebra Stripes', year:'2009', place:'Тимбукту, Мали',
+    tabs:[
+      {t:'Что мы видим', h:'<p>Женщина развешивает на верёвке чёрные полосы, а рядом ждёт зебра, лишённая своего рисунка. Бэнкси использовал старую глиняную стену, чтобы сцена выглядела почти реальной.</p>'},
+      {t:'Как читать', h:'<p>Единой авторской трактовки нет, поэтому работа открыта для чтения. Чаще всего в ней видят образ утраты природной «идентичности» и вопрос: что мы стираем в природе и в самих себе, пока заняты бытом?</p>'},
+      {t:'История', h:'<p>Работа относится к африканскому проекту Бэнкси начала 2009 года. По данным аукционного каталога, оригинал был уничтожен.</p>'}
+    ],
+    fact:'<b>Экология через бытовую сцену:</b> стирка полос — простой образ для сложной темы.'
+  },
+  rat:{
+    title:'Крыса на часах', orig:'Rat Clock · «Крысиные бега»', year:'2018', place:'Нью-Йорк, 14-я улица и 6-я авеню',
+    tabs:[
+      {t:'Смысл', h:'<p>Крыса бежит внутри циферблата, как в колесе для хомяка: «крысиные бега» буквально. Как бы быстро она ни бежала, время идёт, а она остаётся в замкнутом круге.</p>'},
+      {t:'История', h:'<p>Работа появилась в марте 2018 года на старом здании бывшего банка (101 West 14th Street). Это был первый приезд Бэнкси в Нью-Йорк после его месячной «резиденции» 2013 года.</p><p>Через несколько дней владельцы здания демонтировали часы.</p>'},
+      {t:'Крыса — герой', h:'<p>Крысы — фирменные персонажи Бэнкси: они рисуют на стенах, фотографируют, протестуют. Здесь же крыса, наоборот, заперта внутри системы.</p>'}
+    ],
+    fact:'<b>Эфемерность:</b> здание готовили под снос, работа прожила считанные дни — и получила мировой охват.'
+  }
+};
+
+/* ===== ВСПОМОГАТЕЛЬНОЕ ===== */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+
+/* ===== ФОТО ===== */
+function mountImg(fig,key,label){
+  const base=IMAGE_FILES[key]; let k=0; const img=new Image(); img.alt=label;
+  const zoom=document.createElement('div'); zoom.className='zoom'; zoom.textContent='⤢'; fig.appendChild(zoom);
+  const tryNext=()=>{ if(k>=EXT.length) return fail(); img.src=base+'.'+EXT[k++]; };
+  const fail=()=>{
+    img.remove(); zoom.remove(); fig.classList.remove('has');
+    const ph=document.createElement('div'); ph.className='ph';
+    ph.innerHTML='<b>'+label+'</b>Положите фото <u>'+base+'.jpg</u> рядом с index.html или выберите файл прямо сейчас (только для просмотра).<br><label>Выбрать фото<input type="file" accept="image/*"></label>';
+    fig.appendChild(ph);
+    $('input',ph).addEventListener('change',e=>{
+      const f=e.target.files[0]; if(!f) return;
+      ph.remove(); fig.classList.add('has'); img.onerror=null; img.src=URL.createObjectURL(f); fig.prepend(img); fig.appendChild(zoom);
+    });
+    $('label',ph).addEventListener('click',e=>e.stopPropagation());
+  };
+  img.onload=()=>fig.classList.add('has'); img.onerror=tryNext;
+  fig.prepend(img); tryNext();
+  fig.addEventListener('click',()=>{ if(!fig.classList.contains('has')) return; $('#lb img').src=img.src; $('#lb').classList.add('on'); });
+  // лёгкий 3D-наклон
+  fig.addEventListener('mousemove',e=>{ const r=fig.getBoundingClientRect(); const x=(e.clientX-r.left)/r.width-.5, y=(e.clientY-r.top)/r.height-.5; fig.style.transform='perspective(900px) rotateY('+x*7+'deg) rotateX('+(-y*7)+'deg)'; });
+  fig.addEventListener('mouseleave',()=>fig.style.transform='');
+}
+$('#lb').addEventListener('click',()=>$('#lb').classList.remove('on'));
+
+/* ===== СБОРКА СЛАЙДОВ-РАБОТ ===== */
+$$('[data-work]').forEach(sec=>{
+  const key=sec.dataset.work, w=WORKS[key];
+  sec.id=key; sec.dataset.title=w.title;
+  const tabs=w.tabs.map(t=>'<button class="tab">'+t.t+'</button>').join('');
+  const panels=w.tabs.map(t=>'<div class="panel">'+t.h+'</div>').join('');
+  let extra='', fx='';
+  if(w.extra==='snow'){
+    fx='<canvas id="fx"></canvas>';
+    extra='<div class="sw" data-a><span>Режим:</span><div class="tabs" id="snowSw"><button class="tab">Снег</button><button class="tab">Пепел</button></div></div><p class="cap" id="snowCap">Так работа выглядит с первого взгляда: тихий, уютный снегопад.</p>';
+  }
+  sec.innerHTML=fx+'<div class="wrap"><div class="work"><figure class="frame" data-a="mask" data-key="'+key+'"></figure><div class="info">'+
+    '<div class="chips" data-a><span class="pill red">📍 '+w.place+'</span><span class="pill">'+w.year+'</span></div>'+
+    '<h2 data-a>'+w.title+'</h2><p class="orig" data-a>'+w.orig+'</p>'+
+    '<div class="tabs" data-a>'+tabs+'</div><div class="panels" data-a>'+panels+'</div>'+extra+
+    '<div class="fact" data-a>💡 '+w.fact+'</div></div></div></div>';
+  mountImg($('.frame',sec),key,w.title);
+});
+
+/* ===== ТАБЫ ===== */
+function placeInd(tabs){
+  const on=$('.tab.on',tabs); if(!on) return;
+  $('.ind',tabs).style.width=on.offsetWidth+'px';
+  $('.ind',tabs).style.transform='translateX('+on.offsetLeft+'px)';
+}
+function initTabs(){
+  $$('.tabs').forEach(tabs=>{
+    if($('.ind',tabs)) return;
+    const ind=document.createElement('i'); ind.className='ind'; tabs.prepend(ind);
+    const btns=$$('.tab',tabs); const nx=tabs.nextElementSibling;
+    const panels=nx&&nx.classList.contains('panels')?$$('.panel',nx):[];
+    const set=i=>{ btns.forEach((b,j)=>b.classList.toggle('on',i===j)); panels.forEach((p,j)=>p.classList.toggle('on',i===j)); placeInd(tabs); tabs.dispatchEvent(new CustomEvent('tab',{detail:i})); };
+    btns.forEach((b,i)=>b.addEventListener('click',()=>set(i)));
+    set(0);
+  });
+}
+initTabs();
+
+/* ===== ШАРИК, АККОРДЕОН, ФЛИП, СТОЛБЦЫ ===== */
+$('#balloonBtn').addEventListener('click',function(){ this.classList.remove('fly'); void this.offsetWidth; this.classList.add('fly'); });
+$$('.acc-h').forEach(h=>h.addEventListener('click',()=>{ const it=h.parentElement; const open=it.classList.contains('open'); $$('.acc-i').forEach(x=>x.classList.remove('open')); if(!open) it.classList.add('open'); }));
+$$('.flip').forEach(f=>f.addEventListener('click',()=>f.classList.toggle('on')));
+$$('.bar').forEach(b=>b.addEventListener('click',()=>{ $$('.bar').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); const d=$('#barD'); d.style.opacity=0; setTimeout(()=>{d.textContent=b.dataset.d; d.style.opacity=1;},220); }));
+$('#barD').style.transition='opacity .25s';
+
+/* ===== СНЕГ / ПЕПЕЛ ===== */
+const fx={cv:null,ctx:null,p:[],mode:0,raf:0,on:false};
+function fxInit(){
+  fx.cv=$('#fx'); fx.ctx=fx.cv.getContext('2d');
+  const rs=()=>{ fx.cv.width=fx.cv.clientWidth; fx.cv.height=fx.cv.clientHeight; };
+  rs(); addEventListener('resize',rs);
+  fx.p=Array.from({length:150},()=>({x:Math.random()*fx.cv.width,y:Math.random()*fx.cv.height,r:1.2+Math.random()*3.2,v:.4+Math.random()*1.2,ph:Math.random()*6.28}));
+  $('#snowSw').addEventListener('tab',e=>{
+    fx.mode=e.detail;
+    const c=$('#snowCap'); c.style.opacity=0;
+    setTimeout(()=>{ c.textContent=fx.mode?'А вот что на самом деле: хлопья серые, это пепел от горящего мусора — и мальчик ловит его ртом.':'Так работа выглядит с первого взгляда: тихий, уютный снегопад.'; c.style.opacity=1; },250);
+  });
+}
+function fxLoop(t){
+  if(!fx.on) return;
+  const {ctx,cv,p,mode}=fx; ctx.clearRect(0,0,cv.width,cv.height);
+  p.forEach(o=>{
+    o.y+=o.v*(mode?1.1:.9); o.x+=Math.sin(t/900+o.ph)*.5+(mode?.6:.1);
+    if(o.y>cv.height+8){o.y=-8;o.x=Math.random()*cv.width} if(o.x>cv.width+8)o.x=-8;
+    ctx.beginPath(); ctx.arc(o.x,o.y,o.r,0,6.28);
+    ctx.fillStyle=mode?'rgba(70,66,62,.55)':'rgba(255,255,255,.95)';
+    if(!mode){ctx.shadowColor='rgba(80,110,150,.55)';ctx.shadowBlur=6}else{ctx.shadowBlur=0}
+    ctx.fill();
+  });
+  fx.raf=requestAnimationFrame(fxLoop);
+}
+function fxState(active){
+  if(active&&!fx.on){fx.on=true;fx.raf=requestAnimationFrame(fxLoop)}
+  if(!active){fx.on=false;cancelAnimationFrame(fx.raf)}
+}
+fxInit();
+
+/* ===== ВИКТОРИНА ===== */
+const QS=[
+ {q:'Что произошло с «Девочкой с воздушным шаром» в 2018 году на аукционе?',o:['Её украли прямо из зала','Она частично самоуничтожилась через шредер в раме','Её закрасили на стене','Её продали за $1 млрд'],a:1},
+ {q:'В каком городе появилась работа Season’s Greetings?',o:['Порт-Талбот, Уэльс','Бристоль','Нью-Йорк','Кале'],a:0},
+ {q:'На что намекает горничная, заметающая сор под стену?',o:['На любовь к чистоте','На то, что неудобные проблемы прячут, а не решают','На рекламу моющих средств','На историю отеля'],a:1},
+ {q:'Чьим сыном изображён Стив Джобс в работе про беженцев?',o:['Французского фермера','Британского лорда','Сирийского мигранта','Японского дизайнера'],a:2},
+ {q:'Что символизирует крыса, бегущая внутри циферблата?',o:['Скорость прогресса','«Крысиные бега» и замкнутый круг','Победу над временем','Реставрацию часов'],a:1}
+];
+let qi=0,score=0;
+function renderQ(){
+  const b=$('#qBody'); b.style.opacity=0;
+  setTimeout(()=>{
+    if(qi>=QS.length){
+      const p=Math.round(score/QS.length*100);
+      b.innerHTML='<h2>Результат</h2><div style="display:flex;align-items:center;gap:26px;margin-top:22px;flex-wrap:wrap"><div class="ring" style="--p:0" id="rg"><b>'+score+'/'+QS.length+'</b></div><div><p class="lead" style="margin:0">'+(p>=80?'Отлично! Вы читаете улицу, как Бэнкси.':p>=40?'Хорошо, но на стенах ещё много слоёв.':'Самое время вернуться к работам.')+'</p><button class="cta" id="again" style="margin-top:16px">Ещё раз <span>↺</span></button></div></div>';
+      b.style.opacity=1; setTimeout(()=>{$('#rg').style.setProperty('--p',p)},60);
+      $('#again').onclick=()=>{qi=0;score=0;renderQ()}; return;
+    }
+    const q=QS[qi];
+    b.innerHTML='<div class="qmeta"><span>Вопрос '+(qi+1)+' из '+QS.length+'</span><span>Счёт: '+score+'</span></div><h2 style="font-size:clamp(20px,2.4vw,32px)">'+q.q+'</h2><div class="qopts">'+q.o.map((t,i)=>'<button class="qo" data-i="'+i+'">'+t+'</button>').join('')+'</div><button class="qnext" id="qn">'+(qi===QS.length-1?'Результат →':'Дальше →')+'</button>';
+    b.style.opacity=1;
+    $$('.qo',b).forEach(btn=>btn.addEventListener('click',()=>{
+      const i=+btn.dataset.i; $$('.qo',b).forEach(x=>x.disabled=true);
+      if(i===q.a){btn.classList.add('ok');score++}else{btn.classList.add('no');$$('.qo',b)[q.a].classList.add('ok')}
+      $('#qn').classList.add('show');
+    }));
+    $('#qn').onclick=()=>{qi++;renderQ()};
+  },250);
+}
+$('#qBody').style.transition='opacity .25s';
+renderQ();
+
+/* ===== СЧЁТЧИКИ ===== */
+function countUp(root){
+  $$('[data-count]',root).forEach(el=>{
+    const to=+el.dataset.count, pre=el.dataset.prefix||'', suf=el.dataset.suffix||''; let s=null;
+    const step=t=>{ if(!s)s=t; const k=Math.min((t-s)/1600,1), e=1-Math.pow(1-k,4); el.textContent=pre+Math.round(to*e)+suf; if(k<1)requestAnimationFrame(step); };
+    el.textContent=pre+'0'+suf; setTimeout(()=>requestAnimationFrame(step),500);
+  });
+}
+
+/* ===== НАВИГАЦИЯ ===== */
+const slides=$$('.slide'); let cur=-1;
+slides.forEach(sl=>{ $$('[data-a]',sl).forEach((e,i)=>e.style.setProperty('--i',i)); });
+$$('[data-spray]').forEach(h=>{ const t=h.textContent; h.textContent=''; [...t].forEach((c,k)=>{ const s=document.createElement('span'); s.textContent=c; s.style.setProperty('--k',k); h.appendChild(s); }); });
+
+const dots=$('#dots'); slides.forEach((s,i)=>{ const d=document.createElement('button'); d.setAttribute('aria-label','Слайд '+(i+1)); d.onclick=()=>go(i); dots.appendChild(d); });
+const ovG=$('#ovG'); slides.forEach((s,i)=>{ const c=document.createElement('button'); c.className='ov-c'; c.innerHTML='<i>'+String(i+1).padStart(2,'0')+'</i><span>'+(s.dataset.title||'')+'</span>'; c.onclick=()=>{go(i);$('#ov').classList.remove('on')}; ovG.appendChild(c); });
+
+function go(n){
+  n=Math.max(0,Math.min(slides.length-1,n)); if(n===cur) return;
+  slides.forEach((s,i)=>{ s.classList.remove('active','prev'); if(i<n) s.classList.add('prev'); });
+  slides[n].classList.add('active'); cur=n;
+  $$('button',dots).forEach((d,i)=>d.classList.toggle('on',i===n));
+  $$('.ov-c').forEach((c,i)=>c.classList.toggle('cur',i===n));
+  $('#prog').style.width=((n+1)/slides.length*100)+'%';
+  $('#count').textContent=(n+1)+' / '+slides.length;
+  $('#bPrev').disabled=n===0; $('#bNext').disabled=n===slides.length-1;
+  fxState(slides[n].id==='snow');
+  countUp(slides[n]);
+  $$('.wrap',slides[n]).forEach(w=>w.scrollTop=0);
+  setTimeout(()=>$$('.tabs',slides[n]).forEach(placeInd),80);
+  try{history.replaceState(null,'','#'+(n+1))}catch(e){}
+}
+const goId=id=>go(slides.findIndex(s=>s.id===id));
+document.addEventListener('click',e=>{
+  const g=e.target.closest('[data-go]'); if(g){goId(g.dataset.go);return}
+  if(e.target.closest('[data-next]')) go(cur+1);
+});
+$('#bPrev').onclick=()=>go(cur-1); $('#bNext').onclick=()=>go(cur+1);
+$('#bOv').onclick=()=>$('#ov').classList.toggle('on');
+const setTheme=t=>{document.documentElement.dataset.theme=t;try{localStorage.setItem('bk-theme',t)}catch(e){}};
+$('#bTheme').onclick=()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');
+try{const t=localStorage.getItem('bk-theme'); if(t) setTheme(t)}catch(e){}
+$('#bFs').onclick=()=>{ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen(); };
+
+document.addEventListener('keydown',e=>{
+  if(e.target.matches('input')) return;
+  const k=e.key;
+  if(k==='ArrowRight'||k==='PageDown'||(k===' '&&!e.target.closest('button'))){e.preventDefault();go(cur+1)}
+  else if(k==='ArrowLeft'||k==='PageUp'){go(cur-1)}
+  else if(k==='Home'){go(0)} else if(k==='End'){go(slides.length-1)}
+  else if(k==='g'||k==='G'||k==='п'||k==='П'){$('#ov').classList.toggle('on')}
+  else if(k==='t'||k==='T'||k==='е'||k==='Е'){$('#bTheme').click()}
+  else if(k==='f'||k==='F'||k==='а'||k==='А'){$('#bFs').click()}
+  else if(k==='Escape'){$('#ov').classList.remove('on');$('#lb').classList.remove('on')}
+});
+let tx=0,ty=0;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+document.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tx, dy=e.changedTouches[0].clientY-ty;
+  if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.5){ if(e.target.closest('.tl,.tabs')) return; go(cur+(dx<0?1:-1)); }
+},{passive:true});
+addEventListener('resize',()=>$$('.tabs',slides[cur]).forEach(placeInd));
+document.fonts&&document.fonts.ready.then(()=>$$('.tabs').forEach(placeInd));
+
+const h=parseInt(location.hash.slice(1),10); go(h>0?h-1:0);
+</script>
+</body>
+</html>
